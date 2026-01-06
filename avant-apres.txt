@@ -1,0 +1,4 @@
+L’image originale contient beaucoup d’étoiles visibles, dont certaines sont très lumineuses et prennent beaucoup de place dans l’image. 
+Après l’application d’une érosion, on remarque que les étoiles deviennent plus petites et moins visibles, surtout les plus brillantes. 
+En revanche, cette méthode agit sur toute l’image sans distinction : le fond et les détails faibles de la nébuleuse sont aussi modifiés et perdent en qualité. 
+Cette première étape permet donc de tester le principe de la réduction d’étoiles, mais montre que l’érosion globale n’est pas suffisante et qu’une méthode plus ciblée sera nécessaire pour la suite du projet.
