@@ -15,7 +15,7 @@ hdul = fits.open(fits_file)  # Returns an HDUList object.
 # Displays information about the file
 hdul.info()
 
-# Access the data from the primary HDU .
+# Access the data from the primary HDU
 data = hdul[0].data
 
 # Access header information
@@ -49,14 +49,61 @@ else:
     # Convert to uint8 for OpenCV
     image = ((data - data.min()) / (data.max() - data.min()) * 255).astype('uint8')
 
-# Define a kernel for erosion
-kernel = np.ones((3,3), np.uint8)
-# Perform erosion
-eroded_image = cv.erode(image, kernel, iterations=1)
-
-# Save the eroded image 
-eroded_path = os.path.join(script_dir, 'results', 'eroded_testest.png')
-cv.imwrite(eroded_path, eroded_image)
-
 # Close the file
 hdul.close()
+
+# Phase 1: Test different erosion configurations
+# Define parameters to test
+kernel_sizes = [3, 5, 7]  # Different kernel sizes
+iterations_list = [1, 2, 3]  # Different iteration counts
+
+# Test all parameter combinations
+for ksize in kernel_sizes:
+    for it_count in iterations_list:
+        # Define a kernel for erosion
+        kernel = np.ones((ksize, ksize), np.uint8)
+        # Perform erosion with current parameters
+        eroded_image = cv.erode(image, kernel, iterations=it_count)
+        
+        # Save the eroded image 
+        eroded_path = os.path.join(script_dir, 'results', f'eroded_k{ksize}_it{it_count}.png')
+        cv.imwrite(eroded_path, eroded_image)
+
+# Create a comparison image to show erosion effect
+
+# Use specific configuration for comparison
+kernel_comparison = np.ones((5, 5), np.uint8)
+eroded_comparison = cv.erode(image, kernel_comparison, iterations=2)
+
+# Create side-by-side image
+if image.ndim == 2:  # Monochrome image
+    # Convert to 3 channels for text display
+    original_display = cv.cvtColor(image, cv.COLOR_GRAY2BGR)
+    eroded_display = cv.cvtColor(eroded_comparison, cv.COLOR_GRAY2BGR)
+else:  # Color image
+    original_display = image.copy()
+    eroded_display = eroded_comparison.copy()
+
+# Create larger image to display both versions
+height = max(original_display.shape[0], eroded_display.shape[0])
+width_total = original_display.shape[1] + eroded_display.shape[1] + 20  # +20 for space
+
+# Background image
+comparison_image = np.ones((height, width_total, 3), dtype=np.uint8) * 50  # Dark gray
+
+# Place original image on left
+comparison_image[:original_display.shape[0], :original_display.shape[1]] = original_display
+
+# Place eroded image on right
+x_offset = original_display.shape[1] + 20
+comparison_image[:eroded_display.shape[0], x_offset:x_offset+eroded_display.shape[1]] = eroded_display
+
+# Add descriptive text
+font = cv.FONT_HERSHEY_SIMPLEX
+cv.putText(comparison_image, 'ORIGINAL', (10, 30), font, 1, (255, 255, 255), 2)
+cv.putText(comparison_image, 'EROSION (k=5, it=2)', (x_offset + 10, 30), font, 1, (255, 255, 255), 2)
+cv.putText(comparison_image, 'Phase 1 - Simple erosion test', (10, height - 20), font, 0.7, (200, 200, 200), 1)
+
+# Save comparison image
+comparison_path = os.path.join(script_dir, 'results', 'comparaison_phase1.png')
+cv.imwrite(comparison_path, comparison_image)
