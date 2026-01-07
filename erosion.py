@@ -15,7 +15,7 @@ hdul = fits.open(fits_file)  # Returns an HDUList object.
 # Displays information about the file
 hdul.info()
 
-# Access the data from the primary HDU
+# Access the data from the primary HDU .
 data = hdul[0].data
 
 # Access header information
