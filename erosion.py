@@ -5,14 +5,12 @@ import cv2 as cv
 import numpy as np
 import os
 
-<<<<<<< HEAD
 # Paths
 fits_file = "./examples/HorseHead.fits"
 os.makedirs("./results", exist_ok=True)
 
 # --- Load FITS ---
 hdul = fits.open(fits_file)
-=======
 # Get the directory where this script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -25,7 +23,6 @@ hdul = fits.open(fits_file)  # Returns an HDUList object.
 hdul.info()
 
 # Access the data from the primary HDU
->>>>>>> 09c6666e62ba2c578ebb4b382f1494ba49b95715
 data = hdul[0].data
 hdul.close()
 
@@ -34,7 +31,6 @@ if data.ndim == 3:
     # Color: transpose if needed (3, H, W) -> (H, W, 3)
     if data.shape[0] == 3:
         data = np.transpose(data, (1, 2, 0))
-<<<<<<< HEAD
 
     # Save original (normalized for display)
     data_norm = (data - data.min()) / (data.max() - data.min())
@@ -61,7 +57,6 @@ for k in kernel_sizes:
         out_path = f"./results/eroded_k{k}_it{it}.png"
         cv.imwrite(out_path, eroded)
         print("Saved:", out_path)
-=======
     # If already (height, width, 3), no change needed
     
     # Normalizes the entire image to [0, 1] for matplotlib
@@ -96,4 +91,3 @@ cv.imwrite(eroded_path, eroded_image)
 
 # Close the file
 hdul.close()
->>>>>>> 09c6666e62ba2c578ebb4b382f1494ba49b95715
