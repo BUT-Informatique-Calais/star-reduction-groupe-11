@@ -22,11 +22,9 @@ except Exception:
 
 PY = sys.executable
 
-# --- Scripts existants dans ton dossier (d'après ton screenshot) ---
-PHASE1_SCRIPT = "erosion.py"
-PHASE2_SCRIPT = "phase2_masked_erosion.py"
-GUI_SCRIPT    = "gui_star_reduction.py"
-BATCH_SCRIPT  = "batch_star_reduction.py"
+PHASE1_SCRIPT = "./erosion.py"
+PHASE2_SCRIPT = "./phase2_upgraded.py"
+
 # ---------------------------------------------------------------
 
 
@@ -123,7 +121,7 @@ def _split_view(before: np.ndarray, after: np.ndarray, ratio: float, after_left:
 class Launcher(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("STAR REDUCTION — Launcher (Phase 1/2/GUI/Batch + Comparateur)")
+        self.title("STAR REDUCTION — Launcher (Phase 1/2 + Comparateur)")
         self.geometry("1100x680")
 
         self.fits_path = tk.StringVar(value="")
@@ -136,6 +134,11 @@ class Launcher(tk.Tk):
 
         self.before_img = None
         self.after_img = None
+
+        self.result_fig = Figure(figsize=(7.2, 4.3), dpi=110)
+        self.result_ax = self.result_fig.add_subplot(111)
+        self.result_ax.set_axis_off()
+        self.result_canvas = None  # will be set in build
 
         self._build()
 
@@ -157,9 +160,16 @@ class Launcher(tk.Tk):
         btns.pack(fill=tk.X)
 
         ttk.Button(btns, text="▶ Phase 1 (erosion.py)", command=self.run_phase1).pack(side=tk.LEFT)
-        ttk.Button(btns, text="▶ Phase 2 (phase2_masked_erosion.py)", command=self.run_phase2).pack(side=tk.LEFT, padx=8)
-        ttk.Button(btns, text="▶ GUI (gui_star_reduction.py)", command=self.run_gui).pack(side=tk.LEFT, padx=8)
-        ttk.Button(btns, text="▶ Batch (batch_star_reduction.py)", command=self.run_batch).pack(side=tk.LEFT, padx=8)
+        ttk.Button(btns, text="▶ Phase 2 (phase2_upgraded.py)", command=self.run_phase2).pack(side=tk.LEFT, padx=8)
+
+        ttk.Separator(self).pack(fill=tk.X, padx=10, pady=6)
+
+        # Résultats
+        res = ttk.LabelFrame(self, text="Résultats de la phase", padding=10)
+        res.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
+
+        self.result_canvas = FigureCanvasTkAgg(self.result_fig, master=res)
+        self.result_canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
         ttk.Separator(self).pack(fill=tk.X, padx=10, pady=6)
 
@@ -225,14 +235,16 @@ class Launcher(tk.Tk):
         return fp, od
 
     def _run_script(self, script_name: str, args: list[str]):
-        if not os.path.exists(script_name):
-            messagebox.showerror("Erreur", f"Fichier introuvable: {script_name}")
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        script_path = os.path.join(script_dir, script_name)
+        if not os.path.exists(script_path):
+            messagebox.showerror("Erreur", f"Fichier introuvable: {script_path}")
             return
 
-        cmd = [PY, script_name] + args
+        cmd = [PY, script_path] + args
         self._log("CMD: " + " ".join(cmd))
         try:
-            p = subprocess.run(cmd, capture_output=True, text=True, cwd=os.getcwd())
+            p = subprocess.run(cmd, capture_output=True, text=True, cwd=script_dir)
             if p.stdout.strip():
                 self._log(p.stdout.strip())
             if p.stderr.strip():
@@ -248,6 +260,7 @@ class Launcher(tk.Tk):
             fp, od = self._ensure_fits_and_out()
             # Beaucoup de scripts acceptent: input output ; si le tien est différent, dis-moi et je te change 1 ligne.
             self._run_script(PHASE1_SCRIPT, [fp, od])
+            self.display_result(os.path.join(od, 'comparaison_phase1.png'))
         except Exception as e:
             messagebox.showerror("Phase 1", str(e))
 
@@ -255,21 +268,9 @@ class Launcher(tk.Tk):
         try:
             fp, od = self._ensure_fits_and_out()
             self._run_script(PHASE2_SCRIPT, [fp, od])
+            self.display_result(os.path.join(od, 'comparaison_phase2.png'))
         except Exception as e:
             messagebox.showerror("Phase 2", str(e))
-
-    def run_gui(self):
-        # Lance ta GUI existante telle quelle
-        self._run_script(GUI_SCRIPT, [])
-
-    def run_batch(self):
-        in_dir = filedialog.askdirectory(title="Dossier d'entrée batch (FITS)")
-        if not in_dir:
-            return
-        out_dir = filedialog.askdirectory(title="Dossier de sortie batch")
-        if not out_dir:
-            return
-        self._run_script(BATCH_SCRIPT, [in_dir, out_dir])
 
     # --- Comparateur ---
     def pick_before(self):
@@ -314,6 +315,17 @@ class Launcher(tk.Tk):
         self.ax.set_axis_off()
         self.ax.imshow(img, interpolation="nearest")
         self.canvas.draw_idle()
+
+    def display_result(self, path: str):
+        try:
+            img = _read_img(path)
+            self.result_ax.clear()
+            self.result_ax.set_axis_off()
+            self.result_ax.imshow(img, interpolation="nearest")
+            self.result_canvas.draw_idle()
+            self._log(f"Résultat affiché: {path}")
+        except Exception as e:
+            self._log(f"Erreur affichage résultat: {e}")
 
 
 if __name__ == "__main__":

@@ -1,15 +1,21 @@
 import os
+import sys
 from astropy.io import fits
 import matplotlib.pyplot as plt
 import cv2 as cv
 import numpy as np
 
-# Get the directory where this script is located
-script_dir = os.path.dirname(os.path.abspath(__file__))
+if len(sys.argv) < 3:
+    print("Usage: python erosion.py <input_fits> <output_dir>")
+    sys.exit(1)
+
+fits_file = sys.argv[1]
+output_dir = sys.argv[2]
+
+os.makedirs(output_dir, exist_ok=True)
 
 # https://docs.astropy.org/en/stable/io/fits/index.html
 # Open and read the FITS file
-fits_file = os.path.join(script_dir, 'examples', 'test_M31_raw.fits')
 hdul = fits.open(fits_file)  # Returns an HDUList object.
 
 # Displays information about the file
@@ -32,7 +38,7 @@ if data.ndim == 3:
     data_normalized = (data - data.min()) / (data.max() - data.min())
     
     # Save the data as a png image (no cmap for color images)
-    original_path = os.path.join(script_dir, 'results', 'original.png')
+    original_path = os.path.join(output_dir, 'original.png')
     plt.imsave(original_path, data_normalized)
     
     # Normalizes each channel separately to [0, 255] for OpenCV
@@ -43,7 +49,7 @@ if data.ndim == 3:
         image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
 else:
     # Monochrome image 
-    original_path = os.path.join(script_dir, 'results', 'original.png')
+    original_path = os.path.join(output_dir, 'original.png')
     plt.imsave(original_path, data, cmap='gray')
     
     # Convert to uint8 for OpenCV
@@ -66,7 +72,7 @@ for ksize in kernel_sizes:
         eroded_image = cv.erode(image, kernel, iterations=it_count)
         
         # Save the eroded image 
-        eroded_path = os.path.join(script_dir, 'results', f'eroded_k{ksize}_it{it_count}.png')
+        eroded_path = os.path.join(output_dir, f'eroded_k{ksize}_it{it_count}.png')
         cv.imwrite(eroded_path, eroded_image)
 
 # Create a comparison image to show erosion effect
@@ -105,6 +111,6 @@ cv.putText(comparison_image, 'EROSION (k=5, it=2)', (x_offset + 10, 30), font, 1
 cv.putText(comparison_image, 'Phase 1 - Simple erosion test', (10, height - 20), font, 0.7, (200, 200, 200), 1)
 
 # Save comparison image
-comparison_path = os.path.join(script_dir, 'results', 'comparaison_phase1.png')
+comparison_path = os.path.join(output_dir, 'comparaison_phase1.png')
 cv.imwrite(comparison_path, comparison_image)
 "test complete"

@@ -1,4 +1,5 @@
 import os
+import sys
 from astropy.io import fits
 import matplotlib.pyplot as plt
 import cv2 as cv
@@ -6,11 +7,18 @@ import numpy as np
 from photutils.detection import DAOStarFinder
 from astropy.stats import sigma_clipped_stats
 
+if len(sys.argv) < 3:
+    print("Usage: python phase2_upgraded.py <input_fits> <output_dir>")
+    sys.exit(1)
+
+fits_file = sys.argv[1]
+output_dir = sys.argv[2]
+
+# Ensure output directory exists
+os.makedirs(output_dir, exist_ok=True)
+
 # Get the directory where this script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
-
-# Open and read the FITS file
-fits_file = os.path.join(script_dir, 'examples', 'test_M31_raw.fits')
 hdul = fits.open(fits_file)  # Returns an HDUList object
 
 # Access the data from the primary HDU
@@ -26,7 +34,7 @@ if data.ndim == 3:
     data_normalized = (data - data.min()) / (data.max() - data.min())
     
     # Save the data as a png image (no cmap for color images)
-    original_path = os.path.join(script_dir, 'results', 'original_phase2.png')
+    original_path = os.path.join(output_dir, 'original_phase2.png')
     plt.imsave(original_path, data_normalized)
     
     # Normalizes each channel separately to [0, 255] for OpenCV
@@ -37,7 +45,7 @@ if data.ndim == 3:
         image = cv.cvtColor(image, cv.COLOR_RGB2BGR)
 else:
     # Monochrome image 
-    original_path = os.path.join(script_dir, 'results', 'original_phase2.png')
+    original_path = os.path.join(output_dir, 'original_phase2.png')
     plt.imsave(original_path, data, cmap='gray')
     
     # Convert to uint8 for OpenCV
@@ -139,13 +147,13 @@ final_image = (
 ).astype(np.uint8)
 
 # Save the result
-final_path = os.path.join(script_dir, 'results', 'result_phase2.png')
+final_path = os.path.join(output_dir, 'result_phase2.png')
 cv.imwrite(final_path, final_image)
 
 # Feature 5 : before and after comparator
 
 # CREATE COMPARISON TOOLS
-results_dir = os.path.join(script_dir, 'results')
+results_dir = output_dir
 
 # Prepare images for display
 if image.ndim == 2:  # Monochrome
