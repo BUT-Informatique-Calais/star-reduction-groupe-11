@@ -21,7 +21,7 @@
 - **Comparateur interactif** avant/après avec curseur de partage
 - **Réduction multi-taille** adaptative (petites/moyennes/grandes étoiles)
 - **Traitement par lots** pour automatisation
-- *Carte de différence** colorée pour analyse
+- **Carte de différence** colorée pour analyse
 
 ### Commandes d'execution :
 
@@ -74,6 +74,7 @@ Example files are located in the `examples/` directory. You can run the scripts 
 - Example 1 : `examples/HorseHead.fits` (Black and whiteFITS image file for testing)
 - Example 2 : `examples/test_M31_linear.fits` (Color FITS image file for testing)
 - Example 3 : `examples/test_M31_raw.fits` (Color FITS image file for testing)
+
 
 
 
