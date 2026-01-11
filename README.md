@@ -1,5 +1,6 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/zP0O23M7)
 
+#Auteurs : Moussalli Soukaina, Fikri Ahmed, Bakri Mohammed
 # Project Documentation
 
 ## Installation
@@ -44,6 +45,7 @@ Example files are located in the `examples/` directory. You can run the scripts 
 - Example 1 : `examples/HorseHead.fits` (Black and whiteFITS image file for testing)
 - Example 2 : `examples/test_M31_linear.fits` (Color FITS image file for testing)
 - Example 3 : `examples/test_M31_raw.fits` (Color FITS image file for testing)
+
 
 
 
