@@ -1,7 +1,3 @@
-# launcher.py
-# Petit launcher GUI: lance tes scripts existants + comparateur avant/après
-# NE MODIFIE AUCUN FICHIER EXISTANT.
-
 import os
 import sys
 import subprocess
@@ -10,7 +6,7 @@ from tkinter import ttk, filedialog, messagebox
 
 import numpy as np
 
-# Matplotlib (affichage comparateur)
+
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -25,7 +21,7 @@ PY = sys.executable
 PHASE1_SCRIPT = "./erosion.py"
 PHASE2_SCRIPT = "./phase2_upgraded.py"
 
-# ---------------------------------------------------------------
+
 
 
 def _read_img(path: str) -> np.ndarray:
@@ -63,12 +59,9 @@ def _read_img(path: str) -> np.ndarray:
         if data is None:
             raise ValueError("FITS vide ou invalide.")
         data = np.array(data, dtype=np.float32)
-        # si 2D => ok ; si 3D => essaye HWC ou CHW
         if data.ndim == 3:
-            # si (C,H,W)
             if data.shape[0] in (1, 3) and data.shape[1] > 10 and data.shape[2] > 10:
                 data = np.transpose(data, (1, 2, 0))
-            # si (H,W,C) => ok
         return data
 
     raise ValueError("Format non supporté. Utilise FITS/PNG/JPG.")
@@ -138,7 +131,7 @@ class Launcher(tk.Tk):
         self.result_fig = Figure(figsize=(7.2, 4.3), dpi=110)
         self.result_ax = self.result_fig.add_subplot(111)
         self.result_ax.set_axis_off()
-        self.result_canvas = None  # will be set in build
+        self.result_canvas = None 
 
         self._build()
 
@@ -254,11 +247,10 @@ class Launcher(tk.Tk):
         except Exception as e:
             messagebox.showerror("Erreur", str(e))
 
-    # --- Boutons phases (sans modifier tes fichiers) ---
+    #  Boutons phases  
     def run_phase1(self):
         try:
             fp, od = self._ensure_fits_and_out()
-            # Beaucoup de scripts acceptent: input output ; si le tien est différent, dis-moi et je te change 1 ligne.
             self._run_script(PHASE1_SCRIPT, [fp, od])
             self.display_result(os.path.join(od, 'comparaison_phase1.png'))
         except Exception as e:
@@ -272,7 +264,7 @@ class Launcher(tk.Tk):
         except Exception as e:
             messagebox.showerror("Phase 2", str(e))
 
-    # --- Comparateur ---
+    # Comparateur 
     def pick_before(self):
         p = filedialog.askopenfilename(
             title="Charger AVANT",
